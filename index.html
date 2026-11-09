@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#65c9e8">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='.9em' font-size='54'%3E🐤%3C/text%3E%3C/svg%3E">
+<title>Skybound — A little bird, a big sky</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Fredoka:wght@500;600;700&display=swap');
+:root{color-scheme:light;--ink:#16364c;--muted:#668194;--cream:#fffdf4;--coral:#ff765e;--gold:#ffca58}*{box-sizing:border-box}html,body{height:100%;margin:0;overflow:hidden}body{font-family:'DM Sans',sans-serif;color:var(--ink);background:#8cddf1}.scene{height:100%;width:100%;position:relative;overflow:hidden;background:linear-gradient(180deg,#73d3ed 0%,#bbeced 62%,#eff2ca 100%)}canvas{display:block;width:100%;height:100%;touch-action:none}.brand{position:absolute;top:max(22px,env(safe-area-inset-top));left:clamp(20px,5vw,68px);pointer-events:none;display:flex;align-items:center;gap:11px;color:#16455d}.brand-mark{width:37px;height:37px;border-radius:13px;background:#fff9e9;display:grid;place-items:center;box-shadow:0 4px 0 #e8c982;font-size:21px}.brand-name{font-family:Fredoka,sans-serif;font-weight:600;letter-spacing:.02em;font-size:19px}.brand-sub{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;opacity:.65;margin-top:1px}.sound{position:absolute;right:clamp(18px,4vw,48px);top:max(20px,env(safe-area-inset-top));width:45px;height:45px;border:1px solid #fff9;border-radius:16px;background:#fff7e8d9;color:#24546b;font-size:19px;cursor:pointer;box-shadow:0 3px 0 #78b9c3aa;transition:transform .15s}.sound:hover{transform:translateY(-2px)}.panel{position:absolute;left:50%;top:50%;transform:translate(-50%,-46%);width:min(390px,calc(100vw - 38px));padding:28px 30px 26px;text-align:center;border:2px solid #fff9;border-radius:29px;background:#fffdf0ed;box-shadow:0 16px 0 #438ba744,0 25px 55px #286d8533;backdrop-filter:blur(8px);transition:opacity .2s,transform .2s}.panel.hidden{opacity:0;pointer-events:none;transform:translate(-50%,-40%) scale(.97)}.eyebrow{font-size:10px;letter-spacing:.2em;font-weight:800;text-transform:uppercase;color:#67a8ad}.panel h1{font-family:Fredoka,sans-serif;font-size:clamp(38px,9vw,54px);line-height:.98;margin:8px 0 11px;letter-spacing:-.025em;color:#18445b}.panel p{font-size:14px;line-height:1.55;color:#668194;margin:0 auto 20px;max-width:290px}.button{appearance:none;border:0;border-radius:17px;background:#ff795e;color:#fffdf7;font:700 16px 'DM Sans',sans-serif;padding:14px 28px;min-width:176px;box-shadow:0 5px 0 #d35448;cursor:pointer;transition:transform .12s,box-shadow .12s}.button:hover{transform:translateY(-2px);box-shadow:0 7px 0 #d35448}.button:active{transform:translateY(3px);box-shadow:0 2px 0 #d35448}.hint{margin-top:17px;color:#76939a;font-size:11px;font-weight:600}.best{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:99px;background:#f5efd9;color:#8f783f;font-size:12px;font-weight:700;margin-bottom:16px}.score{position:absolute;top:max(24px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);font:700 clamp(46px,10vw,64px)/1 Fredoka,sans-serif;color:white;-webkit-text-stroke:2px #33768a;text-shadow:0 4px 0 #33768a,0 6px 12px #27698355;pointer-events:none}.score.hidden{display:none}.footer{position:absolute;bottom:max(15px,env(safe-area-inset-bottom));width:100%;text-align:center;color:#41778a99;font-size:10px;font-weight:700;letter-spacing:.08em;pointer-events:none}@media(max-height:570px){.brand{top:12px}.sound{top:12px}.panel{padding:20px 24px}.panel h1{font-size:38px}.panel p{margin-bottom:13px}.hint{margin-top:12px}.footer{bottom:8px}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<main class="scene" id="scene" aria-label="Skybound bird flying game">
+<canvas id="game" aria-label="Game area. Tap, click, or press Space to flap. Avoid the pipes."></canvas>
+<div class="brand"><div class="brand-mark">☀</div><div><div class="brand-name">skybound</div><div class="brand-sub">a little bird, a big sky</div></div></div>
+<button class="sound" id="sound" aria-label="Toggle sound" title="Toggle sound">♫</button>
+<div class="score hidden" id="score" aria-live="polite">0</div>
+<section class="panel" id="panel" aria-live="polite">
+<div class="eyebrow" id="eyebrow">A breezy little adventure</div><h1 id="title">Ready to<br>take flight?</h1><p id="message">The sky is yours. Flap through the gaps and see how far your little wings can take you.</p>
+<div class="best" id="best">✦ &nbsp;BEST <span>0</span></div><br>
+<button class="button" id="play">Let’s fly&nbsp; →</button><div class="hint" id="hint">TAP&nbsp; · &nbsp;CLICK&nbsp; · &nbsp;SPACE</div>
+</section>
+<div class="footer">A LITTLE BIRD &nbsp;·&nbsp; A VERY BIG SKY</div>
+</main>
+<script>
+(()=>{
+'use strict';
+const canvas=document.querySelector('#game'),ctx=canvas.getContext('2d'),scene=document.querySelector('#scene'),panel=document.querySelector('#panel'),scoreEl=document.querySelector('#score'),bestEl=document.querySelector('#best span'),soundBtn=document.querySelector('#sound');
+const H=650,groundH=75;let W=900,groundY=H-groundH,scale=1,ox=0,oy=0,last=0,elapsed=0,mode='ready',score=0,best=Number(localStorage.getItem('skybound-best')||0),muted=false,audio=null;
+bestEl.textContent=best;
+function resize(){const dpr=Math.min(devicePixelRatio||1,2),w=scene.clientWidth,h=scene.clientHeight;canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);scale=h/H;W=w/scale;groundY=H-groundH;bird.x=Math.min(245,W*.29);ox=0;oy=0;ctx.setTransform(dpr*scale,0,0,dpr*scale,0,0)}window.addEventListener('resize',resize);
+const clouds=[{x:100,y:148,s:1},{x:440,y:98,s:.78},{x:750,y:205,s:.9},{x:290,y:290,s:.62},{x:620,y:345,s:.7}];
+const bird={x:245,y:300,vy:0,r:17,rot:0,wing:0};resize();let pipes=[],particles=[],stars=[],pipeClock=0,groundOffset=0,shake=0;
+for(let i=0;i<32;i++)stars.push({x:Math.random()*W,y:Math.random()*groundY,r:Math.random()*1.5+.4,a:Math.random()*.25+.06});
+function rounded(x,y,w,h,r){ctx.beginPath();ctx.roundRect(x,y,w,h,r)}
+function cloud(x,y,s,alpha=.72){ctx.save();ctx.translate(x,y);ctx.scale(s,s);ctx.globalAlpha=alpha;ctx.fillStyle='#fffdf2';ctx.beginPath();ctx.ellipse(0,5,39,13,0,0,Math.PI*2);ctx.ellipse(-18,1,18,14,0,0,Math.PI*2);ctx.ellipse(2,-7,22,22,0,0,Math.PI*2);ctx.ellipse(23,1,19,14,0,0,Math.PI*2);ctx.fill();ctx.restore()}
+function drawBackground(dt){let g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#71d2ed');g.addColorStop(.58,'#b7e9e9');g.addColorStop(1,'#eaf0c9');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+// sun
+const sun=ctx.createRadialGradient(690,125,6,690,125,104);sun.addColorStop(0,'#fffbe0cc');sun.addColorStop(1,'#fff9d000');ctx.fillStyle=sun;ctx.fillRect(570,5,240,240);ctx.fillStyle='#fff4bf';ctx.beginPath();ctx.arc(690,125,34,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff9de';ctx.beginPath();ctx.arc(680,115,26,0,Math.PI*2);ctx.fill();
+stars.forEach(s=>{ctx.globalAlpha=s.a*(.78+.22*Math.sin(elapsed*1.6+s.x));ctx.fillStyle='#fffdf1';ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fill()});ctx.globalAlpha=1;
+clouds.forEach((c,i)=>{let x=(c.x-(elapsed*(mode==='playing'?10:4)*(i%2?1:.6)))%1080;if(x< -100)x+=1080;cloud(x,c.y+Math.sin(elapsed*.5+i)*4,c.s,.66)});
+// layered rolling hills
+ctx.fillStyle='#9dcfae';ctx.beginPath();ctx.moveTo(0,groundY);ctx.lineTo(0,410);ctx.bezierCurveTo(120,347,209,424,330,380);ctx.bezierCurveTo(480,328,545,397,670,359);ctx.bezierCurveTo(780,325,830,378,900,352);ctx.lineTo(900,groundY);ctx.fill();
+ctx.fillStyle='#83bd9e';ctx.beginPath();ctx.moveTo(0,groundY);ctx.lineTo(0,463);ctx.bezierCurveTo(130,405,235,465,362,428);ctx.bezierCurveTo(500,387,584,456,700,421);ctx.bezierCurveTo(799,389,838,437,900,414);ctx.lineTo(900,groundY);ctx.fill();
+// little distant trees
+for(let i=0;i<18;i++){let x=((i*73+35-groundOffset*.18)%980+980)%980-40,y=groundY-48-(i%3)*8;ctx.fillStyle=i%2?'#6da98e':'#78b59a';ctx.beginPath();ctx.arc(x,y,11+i%3*2,0,Math.PI*2);ctx.fill();ctx.fillRect(x-2,y,4,24)}
+}
+function drawPipe(p){let w=76,grad=ctx.createLinearGradient(p.x,0,p.x+w,0);grad.addColorStop(0,'#388d72');grad.addColorStop(.16,'#65bb83');grad.addColorStop(.47,'#80cf8c');grad.addColorStop(.78,'#5bb27c');grad.addColorStop(1,'#347f6d');ctx.fillStyle=grad;
+// bodies with rounded shoulders
+if(p.top>0){ctx.fillRect(p.x,0,w,p.top-19);rounded(p.x-7,p.top-27,w+14,28,8);ctx.fill();ctx.fillStyle='#a1dfa0';ctx.fillRect(p.x+10,0,7,p.top-27);ctx.fillStyle='#317a69';ctx.fillRect(p.x+w-8,0,7,p.top-27);ctx.fillStyle='#388d72';rounded(p.x-7,p.top-27,w+14,5,3);ctx.fill()}
+let bot=p.top+p.gap;ctx.fillStyle=grad;ctx.fillRect(p.x,bot+18,w,groundY-bot-18);rounded(p.x-7,bot-1,w+14,28,8);ctx.fill();ctx.fillStyle='#a1dfa0';ctx.fillRect(p.x+10,bot+26,7,groundY-bot-26);ctx.fillStyle='#317a69';ctx.fillRect(p.x+w-8,bot+26,7,groundY-bot-26);ctx.fillStyle='#388d72';rounded(p.x-7,bot+18,w+14,6,3);ctx.fill();
+// little leaf motif
+ctx.fillStyle='#b9e8a0';ctx.globalAlpha=.72;ctx.beginPath();ctx.ellipse(p.x+42,bot+70,7,3,-.6,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+}
+function drawGround(){ctx.fillStyle='#f0d788';ctx.fillRect(0,groundY,W,groundH);ctx.fillStyle='#a4d587';ctx.fillRect(0,groundY,W,11);ctx.fillStyle='#80c87a';ctx.fillRect(0,groundY,W,4);for(let x=-(groundOffset%34);x<W;x+=34){ctx.fillStyle='#dfbd6b';ctx.beginPath();ctx.ellipse(x+8,groundY+31,7,2,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff0b0';ctx.beginPath();ctx.arc(x+23,groundY+53,2,0,Math.PI*2);ctx.fill()}for(let x=-(groundOffset%67);x<W;x+=67){ctx.fillStyle='#fff0b0';ctx.beginPath();ctx.moveTo(x,groundY+9);ctx.lineTo(x+6,groundY+1);ctx.lineTo(x+9,groundY+10);ctx.fill()}}
+function drawBird(){ctx.save();ctx.translate(bird.x,bird.y);ctx.rotate(bird.rot);let wingY=Math.sin(bird.wing)*5;
+// tail feathers
+ctx.fillStyle='#ee8d48';ctx.beginPath();ctx.moveTo(-14,3);ctx.lineTo(-27,-3);ctx.lineTo(-23,6);ctx.lineTo(-29,12);ctx.lineTo(-12,10);ctx.fill();
+// body shadow
+ctx.fillStyle='#dc8b45';ctx.beginPath();ctx.ellipse(0,1,20,16,0,0,Math.PI*2);ctx.fill();let body=ctx.createLinearGradient(-7,-15,8,17);body.addColorStop(0,'#ffe58a');body.addColorStop(.6,'#ffc95c');body.addColorStop(1,'#f5a548');ctx.fillStyle=body;ctx.beginPath();ctx.ellipse(0,-2,19,15,0,0,Math.PI*2);ctx.fill();
+// wing
+ctx.fillStyle='#eea943';ctx.beginPath();ctx.ellipse(-4,5+wingY,11,7,-.22,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#d58c3c';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(-11,6+wingY);ctx.quadraticCurveTo(-3,4+wingY,3,7+wingY);ctx.stroke();
+// cheek
+ctx.fillStyle='#f28a70';ctx.globalAlpha=.8;ctx.beginPath();ctx.arc(9,4,4,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+// eye
+ctx.fillStyle='#fffdf2';ctx.beginPath();ctx.ellipse(8,-8,6,7,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#243b4b';ctx.beginPath();ctx.arc(10,-8,2.7,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(11,-9,1,0,Math.PI*2);ctx.fill();
+// beak
+ctx.fillStyle='#f17b50';ctx.beginPath();ctx.moveTo(15,-1);ctx.lineTo(28,3);ctx.lineTo(15,7);ctx.closePath();ctx.fill();ctx.fillStyle='#ffae62';ctx.beginPath();ctx.moveTo(15,-1);ctx.lineTo(26,3);ctx.lineTo(15,3);ctx.closePath();ctx.fill();
+ctx.restore()}
+function burst(){for(let i=0;i<17;i++){let a=Math.random()*Math.PI*2,s=Math.random()*3+1;particles.push({x:bird.x,y:bird.y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:1,r:Math.random()*4+2,color:['#fff1a7','#ff9b72','#fffdf2'][i%3]})}}
+function drawParticles(dt){particles.forEach(p=>{p.x+=p.vx*60*dt;p.y+=p.vy*60*dt;p.vy+=.06;p.life-=dt*1.2;ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.r*p.life,0,Math.PI*2);ctx.fill()});ctx.globalAlpha=1;particles=particles.filter(p=>p.life>0)}
+function draw(){ctx.clearRect(-ox/scale,-oy/scale,canvas.width/scale,canvas.height/scale);drawBackground(0);pipes.forEach(drawPipe);drawGround();drawParticles(Math.min((performance.now()-last)/1000,.04));drawBird();if(shake>0){shake*=.85}}
+function reset(){score=0;scoreEl.textContent='0';pipes=[];particles=[];pipeClock=.7;bird.y=300;bird.vy=0;bird.rot=0;bird.wing=0;groundOffset=0;elapsed=0;mode='ready'}
+function flap(){if(mode==='ready'){mode='playing';panel.classList.add('hidden');scoreEl.classList.remove('hidden');bird.vy=-6.1;chirp(620)}else if(mode==='playing'){bird.vy=-6.1;bird.wing+=1;chirp(520)}else if(mode==='over'){reset();mode='playing';panel.classList.add('hidden');scoreEl.classList.remove('hidden');bird.vy=-6.1;chirp(620)}}
+function endGame(){if(mode!=='playing')return;mode='over';burst();chirp(150,.14);scoreEl.classList.add('hidden');let isBest=score>best;if(isBest){best=score;localStorage.setItem('skybound-best',best);bestEl.textContent=best}document.querySelector('#eyebrow').textContent=isBest&&score>0?'A new little record!':'Well, that was a lovely flight';document.querySelector('#title').innerHTML='Wings need<br>a rest.';document.querySelector('#message').textContent=score===0?'The sky is still yours. Give it another go?':`You fluttered past ${score} ${score===1?'pipe':'pipes'}. Fancy one more flight?`;document.querySelector('#play').innerHTML='Fly again&nbsp; →';document.querySelector('#hint').textContent='TAP · CLICK · SPACE TO TRY AGAIN';panel.classList.remove('hidden')}
+function chirp(freq,duration=.07){if(muted)return;try{audio??=new(window.AudioContext||window.webkitAudioContext)();if(audio.state==='suspended')audio.resume();let o=audio.createOscillator(),g=audio.createGain();o.type='sine';o.frequency.setValueAtTime(freq,audio.currentTime);o.frequency.exponentialRampToValueAtTime(freq*.72,audio.currentTime+duration);g.gain.setValueAtTime(.055,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+duration);o.connect(g);g.connect(audio.destination);o.start();o.stop(audio.currentTime+duration)}catch(_){}}
+function update(dt){elapsed+=dt;bird.wing+=dt*12;if(mode==='playing'){bird.vy+=.34;bird.y+=bird.vy;bird.rot=Math.max(-.48,Math.min(.95,bird.vy*.075));groundOffset+=3.1;pipeClock-=dt;if(pipeClock<=0){let gap=170,top=105+Math.random()*(groundY-gap-210);pipes.push({x:W+20,top,gap,passed:false});pipeClock=1.55}pipes.forEach(p=>{p.x-=3.1;if(!p.passed&&p.x+76<bird.x){p.passed=true;score++;scoreEl.textContent=score;chirp(820,.09)}});pipes=pipes.filter(p=>p.x>-100);for(let p of pipes){let inX=bird.x+13>p.x-7&&bird.x-13<p.x+83;if(inX&&(bird.y-12<p.top||bird.y+12>p.top+p.gap)){endGame();break}}if(bird.y+14>=groundY||bird.y-14<0)endGame()}else if(mode==='ready'){bird.y=300+Math.sin(elapsed*2.7)*8;bird.rot=Math.sin(elapsed*2.7)*.035;groundOffset+=.3}else if(mode==='over'){bird.vy+=.3;bird.y=Math.min(groundY-14,bird.y+bird.vy);bird.rot=Math.min(1.3,bird.rot+.035);groundOffset+=.5}}
+function frame(t){let dt=Math.min((t-last)/1000||0,.035);last=t;update(dt);draw();requestAnimationFrame(frame)}requestAnimationFrame(frame);
+canvas.addEventListener('pointerdown',e=>{e.preventDefault();if(!e.target.closest('button'))flap()});document.querySelector('#play').addEventListener('click',e=>{e.stopPropagation();if(mode==='over')reset();flap()});window.addEventListener('keydown',e=>{if(['Space','ArrowUp','KeyW'].includes(e.code)){e.preventDefault();if(!e.repeat)flap()}if(e.code==='Enter'&&mode!=='playing')flap()});soundBtn.addEventListener('click',()=>{muted=!muted;soundBtn.textContent=muted?'♫̸':'♫';soundBtn.setAttribute('aria-label',muted?'Turn sound on':'Turn sound off');if(!muted)chirp(620)});
+})();
+</script>
+</body>
+</html>
